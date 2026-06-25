@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stego Gaurd</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #030814;
+      color: #eaf7ff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: #06142b;
+      border-right: 1px solid #19c7ff;
+      box-shadow: 0 0 18px #19c7ff;
+      padding: 25px 16px;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .logo h1 {
+      color: #31d8ff;
+      font-size: 28px;
+      text-shadow: 0 0 10px #31d8ff;
+      letter-spacing: 1px;
+    }
+
+    .logo p {
+      color: #9cc9db;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      background: transparent;
+      color: #d7f7ff;
+      border: 1px solid #168dc2;
+      box-shadow: 0 0 10px rgba(25, 199, 255, 0.45);
+      padding: 14px;
+      border-radius: 10px;
+      margin: 10px 0;
+      cursor: pointer;
+      text-align: left;
+      font-size: 15px;
+      transition: 0.3s;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: #0b3155;
+      border-color: #31d8ff;
+      box-shadow: 0 0 18px #31d8ff;
+      transform: translateX(4px);
+    }
+
+    /* Main */
+    .main {
+      margin-left: 260px;
+      width: calc(100% - 260px);
+      padding: 35px;
+    }
+
+    .top-title {
+      background: linear-gradient(135deg, #071d39, #081020);
+      border: 1px solid #1bbcff;
+      box-shadow: 0 0 15px rgba(27, 188, 255, 0.55);
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+
+    .top-title h2 {
+      color: #42dcff;
+      font-size: 30px;
+      text-shadow: 0 0 10px #42dcff;
+    }
+
+    .top-title p {
+      color: #bdddea;
+      margin-top: 10px;
+      line-height: 1.6;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #07182d;
+      border: 1px solid #1599d2;
+      box-shadow: 0 0 14px rgba(23, 190, 255, 0.35);
+      border-radius: 15px;
+      padding: 22px;
+    }
+
+    .card h3 {
+      color: #43dcff;
+      margin-bottom: 12px;
+    }
+
+    .card p,
+    .card li {
+      color: #c4e3ef;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .card ul {
+      padding-left: 20px;
+      margin-top: 10px;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 7px;
+      color: #9ceaff;
+      font-size: 14px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      background: #020b18;
+      border: 1px solid #1caee8;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    input:focus,
+    textarea:focus {
+      box-shadow: 0 0 12px #27cfff;
+    }
+
+    .btn {
+      background: #0d8ec7;
+      color: white;
+      border: 1px solid #53ddff;
+      box-shadow: 0 0 12px #1ccfff;
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #15bdf8;
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px #2cdcff;
+    }
+
+    .btn.secondary {
+      background: #112a45;
+    }
+
+    .result-box {
+      margin-top: 16px;
+      background: #020b18;
+      border-left: 4px solid #2bdcff;
+      padding: 14px;
+      color: #d7f8ff;
+      border-radius: 8px;
+      word-break: break-word;
+      min-height: 52px;
+    }
+
+    .preview {
+      margin-top: 15px;
+      width: 100%;
+      max-height: 250px;
+      object-fit: contain;
+      border-radius: 10px;
+      border: 1px solid #1ccfff;
+      display: none;
+    }
+
+    .loader {
+      display: none;
+      margin-top: 15px;
+      color: #53ddff;
+      font-weight: bold;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      display: inline-block;
+      border: 3px solid #123d5a;
+      border-top: 3px solid #46e0ff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .download-link {
+      display: inline-block;
+      margin-top: 15px;
+      color: #4be2ff;
+      text-decoration: none;
+      border: 1px solid #4be2ff;
+      padding: 10px 14px;
+      border-radius: 8px;
+    }
+
+    .download-link:hover {
+      background: #0b3155;
+    }
+
+    .warning {
+      margin-top: 20px;
+      background: #102236;
+      border: 1px solid #e0b400;
+      color: #ffe38a;
+      padding: 15px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 800px) {
+      .sidebar {
+        width: 210px;
+      }
+
+      .main {
+        margin-left: 210px;
+        width: calc(100% - 210px);
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .app {
+        display: block;
+      }
+
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+      }
+
+      .main {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="logo">
+        <h1>STEGO GAURD</h1>
+        <p>Secure • Hide • Protect</p>
+      </div>
+
+      <button class="nav-btn active" onclick="showSection('home', this)">🏠 Dashboard</button>
+      <button class="nav-btn" onclick="showSection('hide', this)">🖼 Hide Message</button>
+      <button class="nav-btn" onclick="showSection('extract', this)">🔍 Extract Message</button>
+      <button class="nav-btn" onclick="showSection('key', this)">🔑 Private Key</button>
+      <button class="nav-btn" onclick="showSection('document', this)">📄 Encrypt Document</button>
+      <button class="nav-btn" onclick="showSection('learn', this)">📘 Learn Steganography</button>
+    </aside>
+
+    <main class="main">
+
+      <div class="top-title">
+        <h2>Welcome to Stego Gaurd</h2>
+        <p>
+          A simple learning website for hiding secret messages inside images,
+          generating private keys, and protecting documents.
+        </p>
+      </div>
+
+      <!-- HOME -->
+      <section id="home" class="section active">
+        <div class="grid">
+          <div class="card">
+            <h3>🖼 Image Steganography</h3>
+            <p>
+              Hide a secret message inside an image. The image still looks almost
+              the same, but it can carry hidden information.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>🔑 Private Key Generator</h3>
+            <p>
+              Generate a random private key for learning how encryption keys work.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>📄 Document Protection</h3>
+            <p>
+              Encrypt simple text documents with a password-based method in your browser.
+            </p>
+          </div>
+        </div>
+
+        <div class="warning">
+          <strong>Educational Notice:</strong> This project is made for learning.
+          Do not use this demo alone to protect highly sensitive personal files.
+        </div>
+      </section>
+
+      <!-- HIDE MESSAGE -->
+      <section id="hide" class="section">
+        <div class="card">
+          <h3>Hide Secret Message Inside an Image</h3>
+          <p>Select an image, write a message, and create a downloadable stego image.</p>
+
+          <label>Select Image</label>
+          <input type="file" id="imageInput" accept="image/png, image/jpeg" />
+
+          <img id="imagePreview" class="preview" alt="Image Preview" />
+
+          <label>Secret Message</label>
+          <textarea id="secretMessage" placeholder="Write your secret message here..."></textarea>
+
+          <button class="btn" onclick="hideMessage()">Hide Message in Image</button>
+
+          <div id="hideLoader" class="loader">
+            <span class="spinner"></span> Encrypting and hiding message...
+          </div>
+
+          <div id="hideResult" class="result-box">
+            Your result will appear here.
+          </div>
+
+          <a id="downloadImage" class="download-link" style="display:none;">Download Stego Image</a>
+        </div>
+      </section>
+
+      <!-- EXTRACT -->
+      <section id="extract" class="section">
+        <div class="card">
+          <h3>Extract Hidden Message</h3>
+          <p>Upload an image created by this website to read its hidden message.</p>
+
+          <label>Upload Stego Image</label>
+          <input type="file" id="extractImageInput" accept="image/png" />
+
+          <button class="btn" onclick="extractMessage()">Extract Message</button>
+
+          <div id="extractLoader" class="loader">
+            <span class="spinner"></span> Reading hidden pixels...
+          </div>
+
+          <div id="extractResult" class="result-box">
+            Hidden message will appear here.
+          </div>
+        </div>
+      </section>
+
+      <!-- KEY -->
+      <section id="key" class="section">
+        <div class="card">
+          <h3>Generate Private Key</h3>
+          <p>A private key is like a secret password used to protect information.</p>
+
+          <label>Key Length</label>
+          <input type="number" id="keyLength" value="32" min="16" max="128" />
+
+          <button class="btn" onclick="generateKey()">Generate Private Key</button>
+
+          <div id="keyLoader" class="loader">
+            <span class="spinner"></span> Generating secure key...
+          </div>
+
+          <div id="keyResult" class="result-box">
+            Your private key will appear here.
+          </div>
+        </div>
+      </section>
+
+      <!-- DOCUMENT -->
+      <section id="document" class="section">
+        <div class="grid">
+          <div class="card">
+            <h3>Encrypt Document Text</h3>
+
+            <label>Write or Paste Document Text</label>
+            <textarea id="documentText" placeholder="Paste your document text here..."></textarea>
+
+            <label>Encryption Password</label>
+            <input type="password" id="encryptPassword" placeholder="Enter a password" />
+
+            <button class="btn" onclick="encryptDocument()">Encrypt Document</button>
+
+            <div id="encryptLoader" class="loader">
+              <span class="spinner"></span> Encrypting document...
+            </div>
+
+            <div id="encryptResult" class="result-box">
+              Encrypted document text will appear here.
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Decrypt Document Text</h3>
+
+            <label>Encrypted Text</label>
+            <textarea id="encryptedText" placeholder="Paste encrypted text here..."></textarea>
+
+            <label>Decryption Password</label>
+            <input type="password" id="decryptPassword" placeholder="Enter the same password" />
+
+            <button class="btn" onclick="decryptDocument()">Decrypt Document</button>
+
+            <div id="decryptLoader" class="loader">
+              <span class="spinner"></span> Decrypting document...
+            </div>
+
+            <div id="decryptResult" class="result-box">
+              Decrypted document text will appear here.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LEARN -->
+      <section id="learn" class="section">
+        <div class="grid">
+          <div class="card">
+            <h3>What is Steganography?</h3>
+            <p>
+              Steganography is the method of hiding information inside another file,
+              such as an image, audio file, or video.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>How This Demo Works</h3>
+            <ul>
+              <li>Your message is converted into binary numbers.</li>
+              <li>The binary data is placed into image pixel values.</li>
+              <li>The changed image is downloaded as a PNG file.</li>
+              <li>The message can later be extracted from that PNG image.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>Why Use Encryption?</h3>
+            <p>
+              Encryption changes readable text into unreadable text. Only someone
+              with the correct password or key should be able to read it again.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    function showSection(sectionId, button) {
+      document.querySelectorAll(".section").forEach(section => {
+        section.classList.remove("active");
+      });
+
+      document.getElementById(sectionId).classList.add("active");
+
+      document.querySelectorAll(".nav-btn").forEach(btn => {
+        btn.classList.remove("active");
+      });
+
+      button.classList.add("active");
+    }
+
+    // Image preview
+    document.getElementById("imageInput").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById("imagePreview");
+
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = "block";
+      }
+    });
+
+    // Convert text to binary
+    function textToBinary(text) {
+      let binary = "";
+
+      for (let i = 0; i < text.length; i++) {
+        binary += text.charCodeAt(i).toString(2).padStart(8, "0");
+      }
+
+      return binary;
+    }
+
+    // Convert binary to text
+    function binaryToText(binary) {
+      let text = "";
+
+      for (let i = 0; i < binary.length; i += 8) {
+        let byte = binary.slice(i, i + 8);
+
+        if (byte.length < 8) break;
+
+        text += String.fromCharCode(parseInt(byte, 2));
+      }
+
+      return text;
+    }
+
+    // Hide message in image
+    function hideMessage() {
+      const fileInput = document.getElementById("imageInput");
+      const message = document.getElementById("secretMessage").value;
+      const loader = document.getElementById("hideLoader");
+      const result = document.getElementById("hideResult");
+      const download = document.getElementById("downloadImage");
+
+      if (!fileInput.files[0]) {
+        result.innerHTML = "Please upload an image first.";
+        return;
+      }
+
+      if (!message.trim()) {
+        result.innerHTML = "Please write a secret message first.";
+        return;
+      }
+
+      loader.style.display = "block";
+      result.innerHTML = "Processing image...";
+      download.style.display = "none";
+
+      setTimeout(() => {
+        const image = new Image();
+        image.src = URL.createObjectURL(fileInput.files[0]);
+
+        image.onload = function() {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          canvas.width = image.width;
+          canvas.height = image.height;
+
+          ctx.drawImage(image, 0, 0);
+
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+
+          const endMarker = "1111111111111110";
+          const binaryMessage = textToBinary(message) + endMarker;
+
+          if (binaryMessage.length > data.length / 4) {
+            loader.style.display = "none";
+            result.innerHTML = "Message is too long for this image. Use a larger image.";
+            return;
+          }
+
+          let binaryIndex = 0;
+
+          for (let i = 0; i < data.length && binaryIndex < binaryMessage.length; i += 4) {
+            data[i] = (data[i] & 254) | parseInt(binaryMessage[binaryIndex]);
+            binaryIndex++;
+          }
+
+          ctx.putImageData(imageData, 0, 0);
+
+          const stegoImage = canvas.toDataURL("image/png");
+
+          download.href = stegoImage;
+          download.download = "stego-gaurd-image.png";
+          download.style.display = "inline-block";
+
+          loader.style.display = "none";
+          result.innerHTML = "Success! Your secret message has been hidden in the image.";
+        };
+      }, 1500);
+    }
+
+    // Extract hidden message
+    function extractMessage() {
+      const fileInput = document.getElementById("extractImageInput");
+      const loader = document.getElementById("extractLoader");
+      const result = document.getElementById("extractResult");
+
+      if (!fileInput.files[0]) {
+        result.innerHTML = "Please upload a stego PNG image.";
+        return;
+      }
+
+      loader.style.display = "block";
+      result.innerHTML = "Scanning image...";
+
+      setTimeout(() => {
+        const image = new Image();
+        image.src = URL.createObjectURL(fileInput.files[0]);
+
+        image.onload = function() {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          canvas.width = image.width;
+          canvas.height = image.height;
+
+          ctx.drawImage(image, 0, 0);
+
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+
+          let binary = "";
+          const endMarker = "1111111111111110";
+
+          for (let i = 0; i < data.length; i += 4) {
+            binary += (data[i] & 1).toString();
+
+            if (binary.endsWith(endMarker)) {
+              binary = binary.slice(0, -endMarker.length);
+              break;
+            }
+          }
+
+          if (!binary || !binaryToText(binary)) {
+            result.innerHTML = "No hidden message found, or this image was not created by Stego Gaurd.";
+          } else {
+            result.innerHTML = "Hidden Message: <br><br><strong>" + binaryToText(binary) + "</strong>";
+          }
+
+          loader.style.display = "none";
+        };
+      }, 1500);
+    }
+
+    // Generate private key
+    function generateKey() {
+      const length = Number(document.getElementById("keyLength").value);
+      const loader = document.getElementById("keyLoader");
+      const result = document.getElementById("keyResult");
+
+      loader.style.display = "block";
+      result.innerHTML = "Creating private key...";
+
+      setTimeout(() => {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        let key = "";
+
+        for (let i = 0; i < length; i++) {
+          key += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        loader.style.display = "none";
+        result.innerHTML = "<strong>Private Key:</strong><br><br>" + key;
+      }, 1200);
+    }
+
+    // Simple XOR encryption for educational demo
+    function xorCipher(text, password) {
+      let output = "";
+
+      for (let i = 0; i < text.length; i++) {
+        output += String.fromCharCode(
+          text.charCodeAt(i) ^ password.charCodeAt(i % password.length)
+        );
+      }
+
+      return output;
+    }
+
+    function encryptDocument() {
+      const text = document.getElementById("documentText").value;
+      const password = document.getElementById("encryptPassword").value;
+      const loader = document.getElementById("encryptLoader");
+      const result = document.getElementById("encryptResult");
+
+      if (!text || !password) {
+        result.innerHTML = "Please enter document text and a password.";
+        return;
+      }
+
+      loader.style.display = "block";
+      result.innerHTML = "Encrypting...";
+
+      setTimeout(() => {
+        const encrypted = btoa(xorCipher(text, password));
+
+        loader.style.display = "none";
+        result.innerHTML = "<strong>Encrypted Text:</strong><br><br>" + encrypted;
+      }, 1500);
+    }
+
+    function decryptDocument() {
+      const encryptedText = document.getElementById("encryptedText").value;
+      const password = document.getElementById("decryptPassword").value;
+      const loader = document.getElementById("decryptLoader");
+      const result = document.getElementById("decryptResult");
+
+      if (!encryptedText || !password) {
+        result.innerHTML = "Please enter encrypted text and password.";
+        return;
+      }
+
+      loader.style.display = "block";
+      result.innerHTML = "Decrypting...";
+
+      setTimeout(() => {
+        try {
+          const decoded = atob(encryptedText);
+          const decrypted = xorCipher(decoded, password);
+
+          loader.style.display = "none";
+          result.innerHTML = "<strong>Decrypted Document:</strong><br><br>" + decrypted;
+        } catch (error) {
+          loader.style.display = "none";
+          result.innerHTML = "Unable to decrypt. Check your encrypted text and password.";
+        }
+      }, 1500);
+    }
+  </script>
+</body>
+</html>
